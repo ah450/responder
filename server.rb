@@ -2,23 +2,25 @@ require "sinatra"
 require "json"
 
 configure do
-    set(:deploy_config) { JSON.parse(File.open("config.json")) }
+    set(:deploy_config) { JSON.parse(File.read("config.json")) }
 end
 
 
 post '/deploy' do
-    payload = JSON.parse(params[:payload])
-    repo_name = @payload["repository"]["full_name"]
+    payload = JSON.parse(request.body.read)
+    repo_name = payload["repository"]["full_name"]
     halt 404, "Unknown repository" unless settings.deploy_config.has? repo_name
     verify_signature(request.body.read, settings.deploy_config[repo_name]["secret"])
     case request.env['HTTP_X_GITHUB_EVENT']
     when 'pull_request'
         if payload["action"].eql? "closed" && payload["pull_request"]["merged"]
             deploy repo_name
+            puts "Done with pull"
         end
     when 'push'
         if payload["ref"].eql? "refs/heads/master"
             deploy repo_name
+            puts "Done with push"
         end
     else
         halt 400, "Bad Event."
