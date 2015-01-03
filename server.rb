@@ -9,7 +9,7 @@ end
 post '/deploy' do
     payload = JSON.parse(request.body.read)
     repo_name = payload["repository"]["full_name"]
-    halt 404, "Unknown repository" unless settings.deploy_config.has? repo_name
+    halt 404, "Unknown repository" unless settings.deploy_config.has_key? repo_name
     verify_signature(request.body.read, settings.deploy_config[repo_name]["secret"])
     case request.env['HTTP_X_GITHUB_EVENT']
     when 'pull_request'
