@@ -31,10 +31,9 @@ def verify_signature(payload_body, token)
 end
 
 def deploy(repo_name)
-    location = settings.deploy_config[repo_name]["location"]
-    pre_pull_script = settings.deploy_config["pre_pull_script"]
-    pull_script = settings.deploy_config["pull_script"]
-    post_pull_script = settings.deploy_config["post_pull_script"]
+    pre_pull_script = settings.deploy_config[repo_name]["pre_pull_script"]
+    pull_script = settings.deploy_config[repo_name]["pull_script"]
+    post_pull_script = settings.deploy_config[repo_name]["post_pull_script"]
     system("bash #{pre_pull_script}")
     system("bash #{pull_script}")
     system("bash #{post_pull_script}")
