@@ -7,10 +7,11 @@ end
 
 
 post '/deploy' do
-    payload = JSON.parse(request.body.read)
+    body = request.body.read
+    payload = JSON.parse(body)
     repo_name = payload["repository"]["full_name"]
     halt 404, "Unknown repository" unless settings.deploy_config.has_key? repo_name
-    verify_signature(request.body.read, settings.deploy_config[repo_name]["secret"])
+    verify_signature(body, settings.deploy_config[repo_name]["secret"])
     case request.env['HTTP_X_GITHUB_EVENT']
     when 'pull_request'
         if payload["action"].eql? "closed" && payload["pull_request"]["merged"]
@@ -29,7 +30,7 @@ end
 
 def verify_signature(payload_body, token)
     signature = 'sha1=' + OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha1'), token, payload_body)
-    halt 403, "Signatures didn't match!" unless Rack::Utils.secure_compare(signature, request.env['HTTP_X_HUB_SIGNATURE'])
+    halt 403, "Failed to verify signature!" unless Rack::Utils.secure_compare(signature, request.env['HTTP_X_HUB_SIGNATURE'])
 end
 
 def deploy(repo_name)
