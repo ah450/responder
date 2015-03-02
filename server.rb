@@ -19,7 +19,7 @@ post '/deploy' do
             puts "Done with pull"
         end
     when 'push'
-        if payload["ref"].eql? "refs/heads/master"
+        if payload["ref"].eql? settings.deploy_config[repo_name]["ref"]
             deploy repo_name
             puts "Done with push"
         end
